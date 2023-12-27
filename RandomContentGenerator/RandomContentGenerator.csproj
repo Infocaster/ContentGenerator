@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <StaticWebAssetBasePath>/App_Plugins/RandomContentGenerator</StaticWebAssetBasePath>
+  </PropertyGroup>
+
+
+  <ItemGroup>
+    <SupportedPlatform Include="browser" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="8.0.0" />
+    <PackageReference Include="RandomDataGenerator.Net" Version="1.0.17" />
+    <PackageReference Include="Umbraco.Cms.Core" Version="13.0.3" />
+    <PackageReference Include="Umbraco.Cms.Web.BackOffice" Version="13.0.3" />
+  </ItemGroup>
+
+</Project>
