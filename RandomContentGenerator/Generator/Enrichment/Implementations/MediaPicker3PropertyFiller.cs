@@ -19,11 +19,7 @@ public class MediaPicker3PropertyFillerFactory(IMediaService mediaService, IMedi
         
     private IPropertyFiller CreateFiller(IPropertyType propertyType, PropertyFillerContext context)
     {
-        var dataType = dataTypeService.GetDataType(propertyType.DataTypeId);
-        if (dataType is null) throw new InvalidOperationException("Cannot find the datatype associated with this property");
-
-        var config = dataType.ConfigurationAs<MediaPicker3Configuration>();
-        if (config is null) throw new InvalidOperationException("Cannot read the configuration assiciated with this property");
+        var config = propertyType.ConfigurationAs<MediaPicker3Configuration>(dataTypeService);
 
         IMedia? startNode = null;
         if (config.StartNodeId is not null) startNode = mediaService.GetById(Guid.Parse(config.StartNodeId.ToString()[^32..]));

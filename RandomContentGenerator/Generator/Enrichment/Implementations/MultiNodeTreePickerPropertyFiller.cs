@@ -27,11 +27,7 @@ public class MultiNodeTreePickerPropertyFillerFactory(
 {
     protected override async ValueTask<IPropertyFiller> CreateFillerAsync(IPropertyType propertyType, PropertyFillerContext context)
     {
-        var dataType = dataTypeService.GetDataType(propertyType.DataTypeId);
-        if (dataType is null) throw new InvalidOperationException("Unable to create filler because the datatype associated with this property cannot be found");
-
-        var config = dataType.ConfigurationAs<MultiNodePickerConfiguration>();
-        if (config is null) throw new InvalidOperationException("Unable to create filler because the associated config cannot be read.");
+        var config = propertyType.ConfigurationAs<MultiNodePickerConfiguration>(dataTypeService);
         
         using var serviceScope = serviceScopeFactory.CreateAsyncScope();
 

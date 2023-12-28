@@ -31,7 +31,8 @@ namespace RandomContentGenerator
                 .Append<MediaPicker3PropertyFillerFactory>()
                 .Append<RTEPropertyFillerFactory>()
                 .Append<DateTimePropertyFillerFactory>()
-                .Append<MultiNodeTreePickerPropertyFillerFactory>();
+                .Append<MultiNodeTreePickerPropertyFillerFactory>()
+                .Append<URLPickerPropertyFillerFactory>();
             builder.Services.AddSingleton<IFillerCollection>(sp => sp.GetRequiredService<FillerCollection>());
         }
     }

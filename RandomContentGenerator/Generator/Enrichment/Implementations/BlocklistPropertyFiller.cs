@@ -16,11 +16,7 @@ public class BlocklistPropertyFillerFactory(
 {
     protected override async ValueTask<IPropertyFiller> CreateFillerAsync(IPropertyType propertyType, PropertyFillerContext context)
     {
-        var dataType = dataTypeService.GetDataType(propertyType.DataTypeId)
-            ?? throw new InvalidOperationException("Cannot create a filler, because the datatype is invalid.");
-
-        var config = dataType.ConfigurationAs<BlockListConfiguration>()
-            ?? throw new InvalidOperationException("Unable to read config of this blocklist");
+        var config = propertyType.ConfigurationAs<BlockListConfiguration>(dataTypeService);
 
         var blockFactories = new List<BlockFactory>(config.Blocks.Length);
         foreach(var block in config.Blocks) blockFactories.Add(await CreateFactoryForBlock(context, block));

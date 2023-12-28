@@ -17,11 +17,7 @@ public class ContentPickerPropertyFillerFactory(
         
     private IPropertyFiller CreateFiller(IPropertyType propertyType, PropertyFillerContext context)
     {
-        var dataType = dataTypeService.GetDataType(propertyType.DataTypeId);
-        if (dataType is null) throw new InvalidOperationException("Cannot create filler because the datatype associated with this property is unknown");
-
-        var config = dataType.ConfigurationAs<ContentPickerConfiguration>();
-        if (config is null) throw new InvalidOperationException("Cannot create filler because the datatype associated with this property has an unknown configuration type.");
+        var config = propertyType.ConfigurationAs<ContentPickerConfiguration>(dataTypeService);
 
         IContent? startNode = null;
         if (config.StartNodeId is not null) startNode = contentService.GetById(Guid.Parse(config.StartNodeId.ToString()[^32..]));
