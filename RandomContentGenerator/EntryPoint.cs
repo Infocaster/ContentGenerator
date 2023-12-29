@@ -2,6 +2,7 @@
 using RandomContentGenerator.Generator.Enrichment;
 using RandomContentGenerator.Generator.Enrichment.Implementations;
 using RandomContentGenerator.Generator.Production;
+using RandomContentGenerator.Menu;
 using RandomContentGenerator.Request;
 using Umbraco.Cms.Core.Composing;
 using Umbraco.Cms.Core.DependencyInjection;
@@ -13,6 +14,10 @@ namespace RandomContentGenerator
     {
         public void Compose(IUmbracoBuilder builder)
         {
+            builder.Services.AddOptions<ContentGeneratorOptions>()
+                .BindConfiguration(ContentGeneratorOptions.Section)
+                .ValidateDataAnnotations();
+
             builder.AddManifestFilter<ManifestFilter>();
             builder.AddNotificationHandler<MenuRenderingNotification, ContentMenuHandler>();
             builder.Services.AddScoped<IGenerateContentRequestHandler, GenerateContentRequestHandler>();

@@ -1,3 +1,4 @@
+using System.Reflection;
 using Umbraco.Cms.Core.Manifest;
 
 namespace RandomContentGenerator;
@@ -8,11 +9,12 @@ public class ManifestFilter : IManifestFilter
     {
         manifests.Add(new PackageManifest
         {
-            Version = "1.0.0",
-            PackageName = "Random Content Generator",
-            Scripts = new []{
+            Version = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "0.0.1",
+            PackageName = "Content Generator",
+            Scripts = [
                 Defaults.PluginBasePath + "/script.iife.js"
-            }
+            ],
+            BundleOptions = BundleOptions.None
         });
     }
 }

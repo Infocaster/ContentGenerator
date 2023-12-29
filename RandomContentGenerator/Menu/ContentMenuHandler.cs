@@ -1,16 +1,20 @@
+using Microsoft.Extensions.Options;
 using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.Events;
 using Umbraco.Cms.Core.Models.Trees;
 using Umbraco.Cms.Core.Notifications;
 
-namespace RandomContentGenerator;
+namespace RandomContentGenerator.Menu;
 
-public class ContentMenuHandler()
+public class ContentMenuHandler(IOptionsMonitor<ContentGeneratorOptions> contentGeneratorOptions)
 : INotificationHandler<MenuRenderingNotification>
 {
     public void Handle(MenuRenderingNotification notification)
     {
         if (!string.Equals(notification.TreeAlias, Constants.Trees.Content, StringComparison.Ordinal))
+            return;
+
+        if (!contentGeneratorOptions.CurrentValue.Enabled)
             return;
 
         if (!NodeIsElligible(notification))
