@@ -9,6 +9,7 @@ public record GenerateContentRequest(
     int ContentId,
     int? Seed,
     int Amount,
+    IReadOnlyCollection<int> ContentTypes,
     double OptionalRatio = 0.5,
     Dictionary<string, object>? AdditionalProperties = null
 );
@@ -36,19 +37,15 @@ public class GenerateContentRequestHandler(
         var content = contentService.GetById(request.ContentId)
             ?? throw new InvalidOperationException("Cannot generate content below the node with the given id");
 
-        var contentType = contentTypeService.Get(content.ContentTypeId)
-            ?? throw new InvalidOperationException("Cannot generate content because the given node has an unknown content type");
-
-        var targetContentTypeId = contentType.AllowedContentTypes?.MinBy(ct => ct.SortOrder)
-            ?? throw new InvalidOperationException("Cannot generate content because the given node doesn't allow childnodes");
-
-        var targetContentType = contentTypeService.Get(targetContentTypeId.Id.Value)
-            ?? throw new InvalidOperationException("Cannot generate content because the childnode type does not exist");
+        var targetContentTypes = contentTypeService.GetAll(request.ContentTypes.ToArray()).ToList();
 
         var generatorContext = CreateGeneratorContext(request);
 
+        var rnd = generatorContext.GetRandom();
+
         for (int i = 0; i < request.Amount; i++)
         {
+            var targetContentType = targetContentTypes[rnd.Next(targetContentTypes.Count)];
             var newContent = randomContentFactory.CreateContent(new RandomContentFactoryContext(
                 content,
                 targetContentType,

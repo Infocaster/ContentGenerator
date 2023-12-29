@@ -5,7 +5,7 @@ using Umbraco.Cms.Core.Notifications;
 
 namespace RandomContentGenerator;
 
-public class ContentMenuHandler
+public class ContentMenuHandler()
 : INotificationHandler<MenuRenderingNotification>
 {
     public void Handle(MenuRenderingNotification notification)
@@ -13,8 +13,20 @@ public class ContentMenuHandler
         if (!string.Equals(notification.TreeAlias, Constants.Trees.Content, StringComparison.Ordinal))
             return;
 
-        MenuItem pluginMenuItem = new ("randomContentGenerator", "Generate random content");
+        if (!NodeIsElligible(notification))
+            return;
+
+        MenuItem pluginMenuItem = new("randomContentGenerator", "Generate random content")
+        {
+            Icon = "fire color-deep-orange",
+        };
         pluginMenuItem.LaunchDialogView(Defaults.ContextMenuViewPath, "Generate random content pages");
         notification.Menu.Items.Add(pluginMenuItem);
+    }
+
+    private static bool NodeIsElligible(MenuRenderingNotification notification)
+    {
+        return int.TryParse(notification.NodeId, out var nodeIdInt)
+            && (nodeIdInt > 0 || nodeIdInt == Constants.System.Root);
     }
 }
