@@ -20,7 +20,7 @@ public class SwitchPropertyFillerFactory
 }
 
 public class SwitchPropertyFiller(IPropertyType propertyType)
-        : IPropertyFiller
+        : IReusablePropertyFiller
 {
     public IPropertySink FillProperties(IPropertySink content, IGeneratorContext context)
     {
@@ -29,5 +29,10 @@ public class SwitchPropertyFiller(IPropertyType propertyType)
 
         content.SetValue(propertyType.Alias, switchValue, null, null);
         return content;
+    }
+
+    public IPropertyFiller Reuse(IPropertyType propertyType)
+    {
+        return new SwitchPropertyFiller(propertyType);
     }
 }

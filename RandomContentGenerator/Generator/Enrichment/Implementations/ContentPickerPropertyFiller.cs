@@ -29,7 +29,7 @@ public class ContentPickerPropertyFillerFactory(
 }
 
 public class ContentPickerPropertyFiller(IPropertyType propertyType, IContentService contentService, int parentId)
-        : IPropertyFiller
+        : IReusablePropertyFiller
 {
     public IPropertySink FillProperties(IPropertySink content, IGeneratorContext context)
     {
@@ -42,5 +42,10 @@ public class ContentPickerPropertyFiller(IPropertyType propertyType, IContentSer
         content.SetValue(propertyType.Alias, value, null, null);
 
         return content;
+    }
+
+    public IPropertyFiller Reuse(IPropertyType propertyType)
+    {
+        return new ContentPickerPropertyFiller(propertyType, contentService, parentId);
     }
 }

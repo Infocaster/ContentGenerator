@@ -15,7 +15,7 @@ public class NumericPropertyFillerFactory()
 }
 
 public class NumericPropertyFiller(IPropertyType propertyType)
-        : IPropertyFiller
+        : IReusablePropertyFiller
 {
     public IPropertySink FillProperties(IPropertySink content, IGeneratorContext context)
     {
@@ -24,5 +24,10 @@ public class NumericPropertyFiller(IPropertyType propertyType)
         content.SetValue(propertyType.Alias, rnd.Next(0, 100), null, null);
 
         return content;
+    }
+
+    public IPropertyFiller Reuse(IPropertyType propertyType)
+    {
+        return new NumericPropertyFiller(propertyType);
     }
 }

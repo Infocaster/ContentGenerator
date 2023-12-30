@@ -46,7 +46,7 @@ public class MediaPicker3PropertyFillerFactory(IMediaService mediaService, IMedi
 }
 
 public class MediaPicker3PropertyFiller(IPropertyType propertyType, int min, int max, IMediaService mediaService, int parentId, IDictionary<string, int>? filters, IJsonSerializer jsonSerializer, IScopeProvider scopeProvider)
-        : IPropertyFiller
+        : IReusablePropertyFiller
 {
     public IPropertySink FillProperties(IPropertySink content, IGeneratorContext context)
     {
@@ -88,6 +88,11 @@ public class MediaPicker3PropertyFiller(IPropertyType propertyType, int min, int
         scope.Complete();
 
         return content;
+    }
+
+    public IPropertyFiller Reuse(IPropertyType propertyType)
+    {
+        return new MediaPicker3PropertyFiller(propertyType, min, max, mediaService, parentId, filters, jsonSerializer, scopeProvider);
     }
 
     [DataContract]

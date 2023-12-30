@@ -18,7 +18,7 @@ public class RTEPropertyFillerFactory()
 }
 
 public class RTEPropertyFiller(IPropertyType propertyType)
-    : IPropertyFiller
+    : IReusablePropertyFiller
 {
     public IPropertySink FillProperties(IPropertySink content, IGeneratorContext context)
     {
@@ -41,5 +41,10 @@ public class RTEPropertyFiller(IPropertyType propertyType)
         content.SetValue(propertyType.Alias, sb.ToString(), null, null);
 
         return content;
+    }
+
+    public IPropertyFiller Reuse(IPropertyType propertyType)
+    {
+        return new RTEPropertyFiller(propertyType);
     }
 }

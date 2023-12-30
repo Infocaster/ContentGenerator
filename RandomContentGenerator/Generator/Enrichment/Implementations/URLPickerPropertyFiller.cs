@@ -30,7 +30,7 @@ public class URLPickerPropertyFillerFactory(IDataTypeService dataTypeService, IC
 }
 
 public class URLPickerPropertyFiller(IPropertyType propertyType, int min, int max, IContentService contentService, IMediaService mediaService, IJsonSerializer jsonSerializer)
-    : IPropertyFiller
+    : IReusablePropertyFiller
 {
     private delegate MultiUrlPickerValueEditor.LinkDto LinkGenerator(IGeneratorContext context);
 
@@ -104,5 +104,10 @@ public class URLPickerPropertyFiller(IPropertyType propertyType, int min, int ma
             Name = loremipsumrandomizer.Generate(),
             Target = rnd.NextDouble() < 0.5 ? "_blank" : null
         };
+    }
+
+    public IPropertyFiller Reuse(IPropertyType propertyType)
+    {
+        return new URLPickerPropertyFiller(propertyType, min, max, contentService, mediaService, jsonSerializer);
     }
 }

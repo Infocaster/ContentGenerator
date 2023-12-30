@@ -107,7 +107,7 @@ public class MultiNodeTreePickerPropertyFillerFactory(
 }
 
 public class MultiNodeTreePickerPropertyFiller(IPropertyType propertyType, int min, int max, IContentService contentService, int parentId, IDictionary<string, int>? filters, IScopeProvider scopeProvider)
-        : IPropertyFiller
+        : IReusablePropertyFiller
 {
     public IPropertySink FillProperties(IPropertySink content, IGeneratorContext context)
     {
@@ -146,5 +146,10 @@ public class MultiNodeTreePickerPropertyFiller(IPropertyType propertyType, int m
         scope.Complete();
 
         return content;
+    }
+
+    public IPropertyFiller Reuse(IPropertyType propertyType)
+    {
+        return new MultiNodeTreePickerPropertyFiller(propertyType, min, max, contentService, parentId, filters, scopeProvider);
     }
 }

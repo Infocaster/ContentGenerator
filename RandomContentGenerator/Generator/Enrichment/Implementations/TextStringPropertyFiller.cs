@@ -24,7 +24,7 @@ public class TextStringPropertyFillerFactory(IDataTypeService dataTypeService)
 }
 
 public class TextStringPropertyFiller(IPropertyType propertyType, int max)
-        : IPropertyFiller
+        : IReusablePropertyFiller
 {
     public IPropertySink FillProperties(IPropertySink content, IGeneratorContext context)
     {
@@ -44,5 +44,10 @@ public class TextStringPropertyFiller(IPropertyType propertyType, int max)
 
         content.SetValue(propertyType.Alias, sb.ToString().Trim(), null, null);
         return content;
+    }
+
+    public IPropertyFiller Reuse(IPropertyType propertyType)
+    {
+        return new TextStringPropertyFiller(propertyType, max);
     }
 }

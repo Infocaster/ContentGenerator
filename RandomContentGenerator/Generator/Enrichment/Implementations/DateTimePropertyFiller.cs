@@ -15,7 +15,7 @@ public class DateTimePropertyFillerFactory()
 }
 
 public class DateTimePropertyFiller(IPropertyType propertyType)
-    : IPropertyFiller
+    : IReusablePropertyFiller
 {
     public IPropertySink FillProperties(IPropertySink content, IGeneratorContext context)
     {
@@ -31,5 +31,10 @@ public class DateTimePropertyFiller(IPropertyType propertyType)
         content.SetValue(propertyType.Alias, value, null, null);
 
         return content;
+    }
+
+    public IPropertyFiller Reuse(IPropertyType propertyType)
+    {
+        return new DateTimePropertyFiller(propertyType);
     }
 }

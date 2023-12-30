@@ -3,7 +3,7 @@ using Umbraco.Cms.Core.Models;
 
 namespace RandomContentGenerator.Generator.Enrichment.Implementations;
 
-public abstract class PropertyFillerFactoryBase(string propertyTypeAlias)
+public abstract class PropertyFillerFactoryBase(string propertyTypeAlias, bool reuseFiller = true)
         : IPropertyFillerFactory
 {
     public async ValueTask<IReadOnlyCollection<IPropertyFiller>> CreateAsync(PropertyFillerContext context)
@@ -12,7 +12,17 @@ public abstract class PropertyFillerFactoryBase(string propertyTypeAlias)
         List<IPropertyFiller> fillers = new (properties.Count);
         foreach(var p in properties)
         {
-            var filler = await CreateFillerAsync(p, context);
+            IPropertyFiller? filler;
+            if (context.ReusableFillers.TryGetValue(p.DataTypeId, out var reusableFiller))
+            {
+                filler = reusableFiller.Reuse(p);
+            }
+            else
+            {
+                filler = await CreateFillerAsync(p, context);
+                if (reuseFiller && filler is IReusablePropertyFiller f) context.ReusableFillers.Add(p.DataTypeId, f);
+            }
+
             if (!p.Mandatory)
             {
                 filler = filler.MakeOptional();
