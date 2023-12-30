@@ -1,41 +1,46 @@
+using System.Text;
 using RandomDataGenerator.FieldOptions;
 using RandomDataGenerator.Randomizers;
 using Umbraco.Cms.Core.Models;
+using Umbraco.Cms.Core.PropertyEditors;
+using Umbraco.Cms.Core.Services;
 
 namespace RandomContentGenerator.Generator.Enrichment.Implementations;
 
-public class TextAreaPropertyFillerFactory
-    : PropertyFillerFactoryBase
+public class TextAreaPropertyFillerFactory(IDataTypeService dataTypeService)
+        : PropertyFillerFactoryBase("Umbraco.TextArea")
 {
-    public TextAreaPropertyFillerFactory()
-    : base("Umbraco.TextArea")
-    {
-    }
-
     protected override ValueTask<IPropertyFiller> CreateFillerAsync(IPropertyType propertyType, PropertyFillerContext context)
         => ValueTask.FromResult(CreateFiller(propertyType, context));
         
     private IPropertyFiller CreateFiller(IPropertyType propertyType, PropertyFillerContext context)
     {
-        return new TextAreaPropertyFiller(propertyType);
+        var config = propertyType.ConfigurationAs<TextAreaConfiguration>(dataTypeService);
+
+        var max = config.MaxChars ?? 1000;
+
+        return new TextAreaPropertyFiller(propertyType, max);
     }
 }
 
-public class TextAreaPropertyFiller(IPropertyType propertyType)
+public class TextAreaPropertyFiller(IPropertyType propertyType, int max)
         : IPropertyFiller
 {
     public IPropertySink FillProperties(IPropertySink content, IGeneratorContext context)
     {
-        var rng = context.GetRandom();
-        FieldOptionsTextLipsum fieldOptions = new ()
-        {
-            Paragraphs = rng.Next(1, 5),
-            Seed = rng.Next()
-        };
-        var loremipsumgenerator = RandomizerFactory.GetRandomizer(fieldOptions);
+        var rnd = context.GetRandom();
 
-        var text = loremipsumgenerator.Generate();
-        content.SetValue(propertyType.Alias, text, null, null);
+        var targetCharacterCount = rnd.Next(1, max + 1);
+
+        var loremipsumrandomizer = RandomizerFactory.GetRandomizer(new FieldOptionsTextLipsum() { Seed = rnd.Next(), Paragraphs = 1 });
+        StringBuilder sb = new (max);
+        while (sb.Length < targetCharacterCount)
+        {
+            sb.AppendLine(loremipsumrandomizer.Generate());
+        }
+
+        sb.Length = targetCharacterCount;
+        content.SetValue(propertyType.Alias, sb.ToString().Trim(), null, null);
 
         return content;
     }
