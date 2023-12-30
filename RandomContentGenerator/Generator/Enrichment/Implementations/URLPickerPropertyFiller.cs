@@ -18,10 +18,14 @@ public class URLPickerPropertyFillerFactory(IDataTypeService dataTypeService, IC
     {
         var config = propertyType.ConfigurationAs<MultiUrlPickerConfiguration>(dataTypeService);
 
+        // Since mandatory properties cannot contain 0 items,
+        //    the minimum for this property is always at least 1
+        var min = Math.Max(config.MinNumber, 1);
+
         var max = config.MaxNumber;
-        if (max == default) max = 10;
+        if (max == default) max = min + 10;
         
-        return new URLPickerPropertyFiller(propertyType, config.MinNumber, max, contentService, mediaService, jsonSerializer);
+        return new URLPickerPropertyFiller(propertyType, min, max, contentService, mediaService, jsonSerializer);
     }
 }
 

@@ -21,7 +21,13 @@ public class BlocklistPropertyFillerFactory(
         var blockFactories = new List<BlockFactory>(config.Blocks.Length);
         foreach(var block in config.Blocks) blockFactories.Add(await CreateFactoryForBlock(context, block));
 
-        return new BlocklistPropertyFiller(propertyType, blockFactories, jsonSerializer);
+        var min = Math.Max(
+            config.ValidationLimit.Min ?? 0,
+            1
+        );
+        var max = config.ValidationLimit.Max ?? min + 10;
+
+        return new BlocklistPropertyFiller(propertyType, min, max, blockFactories, jsonSerializer);
     }
 
     private async ValueTask<BlockFactory> CreateFactoryForBlock(PropertyFillerContext context, BlockListConfiguration.BlockConfiguration blockConfig)
@@ -55,13 +61,13 @@ public class BlocklistPropertyFillerFactory(
     }
 }
 
-public class BlocklistPropertyFiller(IPropertyType propertyType, IReadOnlyList<BlockFactory> blockFactories, IJsonSerializer jsonSerializer)
+public class BlocklistPropertyFiller(IPropertyType propertyType, int min, int max, IReadOnlyList<BlockFactory> blockFactories, IJsonSerializer jsonSerializer)
         : IPropertyFiller
 {
     public IPropertySink FillProperties(IPropertySink content, IGeneratorContext context)
     {
         Random rnd = context.GetRandom();
-        var blockCount = rnd.Next(1, 10);
+        var blockCount = rnd.Next(min, max);
 
         var layout = new List<object>();
 

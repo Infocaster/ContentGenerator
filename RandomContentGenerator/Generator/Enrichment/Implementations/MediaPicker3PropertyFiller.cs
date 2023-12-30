@@ -16,7 +16,7 @@ public class MediaPicker3PropertyFillerFactory(IMediaService mediaService, IMedi
 {
     protected override ValueTask<IPropertyFiller> CreateFillerAsync(IPropertyType propertyType, PropertyFillerContext context)
         => ValueTask.FromResult(CreateFiller(propertyType, context));
-        
+
     private IPropertyFiller CreateFiller(IPropertyType propertyType, PropertyFillerContext context)
     {
         var config = propertyType.ConfigurationAs<MediaPicker3Configuration>(dataTypeService);
@@ -32,11 +32,20 @@ public class MediaPicker3PropertyFillerFactory(IMediaService mediaService, IMedi
         }
 
         var rootId = startNode?.Id ?? Constants.System.Root;
-        return new MediaPicker3PropertyFiller(propertyType, mediaService, rootId, filters, jsonSerializer, scopeProvider);
+
+        // TODO: is there a better way to do this? min should always be at least 1.
+        //       min is exactly one when multiple is false and at least 1 if multiple is true.
+        var min = config.Multiple ? Math.Max(
+            config.ValidationLimit.Min ?? 1,
+            1
+        ) : 1;
+        var max = config.Multiple ? config.ValidationLimit.Max ?? min + 10 : 1;
+
+        return new MediaPicker3PropertyFiller(propertyType, min, max, mediaService, rootId, filters, jsonSerializer, scopeProvider);
     }
 }
 
-public class MediaPicker3PropertyFiller(IPropertyType propertyType, IMediaService mediaService, int parentId, IDictionary<string, int>? filters, IJsonSerializer jsonSerializer, IScopeProvider scopeProvider)
+public class MediaPicker3PropertyFiller(IPropertyType propertyType, int min, int max, IMediaService mediaService, int parentId, IDictionary<string, int>? filters, IJsonSerializer jsonSerializer, IScopeProvider scopeProvider)
         : IPropertyFiller
 {
     public IPropertySink FillProperties(IPropertySink content, IGeneratorContext context)
@@ -58,18 +67,23 @@ public class MediaPicker3PropertyFiller(IPropertyType propertyType, IMediaServic
         }
 
         var mediaCount = mediaService.CountDescendants(parentId, filter?.Key);
-        var randomMediaItem = mediaService.GetPagedDescendants(parentId, rnd.Next(0, mediaCount), 1, out _, query).First();
+        if (mediaCount < min) throw new InvalidOperationException("Cannot generate value for MNTP, because the minimum amount of documents exceeds the amount available");
 
-        var value = new[]
+        var amount = rnd.Next(min, Math.Min(max + 1, mediaCount));
+        if (amount > 0)
         {
-            new MediaWithCropsDto
-            {
-                Key = Guid.NewGuid(),
-                MediaKey = randomMediaItem.Key
-            }
-        };
+            var indexes = rnd.GetRandomInRange(amount, 0, mediaCount);
+            var mediaItems = indexes
+                .Select(i => mediaService.GetPagedDescendants(parentId, i, 1, out _, query).First())
+                .Select(m => new MediaWithCropsDto
+                {
+                    Key = Guid.NewGuid(),
+                    MediaKey = m.Key
+                })
+                .ToList();
 
-        content.SetValue(propertyType.Alias, jsonSerializer.Serialize(value), null, null);
+            content.SetValue(propertyType.Alias, jsonSerializer.Serialize(mediaItems), null, null);
+        }
 
         scope.Complete();
 

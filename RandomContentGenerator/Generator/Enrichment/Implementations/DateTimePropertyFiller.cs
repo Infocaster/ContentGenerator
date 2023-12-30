@@ -19,8 +19,10 @@ public class DateTimePropertyFiller(IPropertyType propertyType)
 {
     public IPropertySink FillProperties(IPropertySink content, IGeneratorContext context)
     {
-        var minDate = new DateTime(2000, 1, 1).Ticks;
-        var maxDate = new DateTime(2070, 1, 1).Ticks;
+        var now = DateTime.UtcNow;
+
+        var minDate = now.AddYears(-30).Ticks;
+        var maxDate = now.AddYears(30).Ticks;
 
         var rnd = context.GetRandom();
         var randomDate = new DateTime(rnd.NextInt64(minDate, maxDate));

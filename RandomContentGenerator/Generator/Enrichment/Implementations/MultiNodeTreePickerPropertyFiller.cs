@@ -21,14 +21,13 @@ public class MultiNodeTreePickerPropertyFillerFactory(
     IEntityService entityService,
     IServiceScopeFactory serviceScopeFactory,
     IDynamicRootService dynamicRootService,
-    IJsonSerializer jsonSerializer,
     IScopeProvider scopeProvider)
     : PropertyFillerFactoryBase("Umbraco.MultiNodeTreePicker")
 {
     protected override async ValueTask<IPropertyFiller> CreateFillerAsync(IPropertyType propertyType, PropertyFillerContext context)
     {
         var config = propertyType.ConfigurationAs<MultiNodePickerConfiguration>(dataTypeService);
-        
+
         using var serviceScope = serviceScopeFactory.CreateAsyncScope();
 
         int rootId = await GetRootAsync(contentService, serviceScope.ServiceProvider.GetRequiredService<IPublishedContentQuery>(), dynamicRootService, context, config);
@@ -40,7 +39,14 @@ public class MultiNodeTreePickerPropertyFillerFactory(
             filters = keys.ToDictionary(k => k, k => contentTypeService.Get(k)!.Id);
         }
 
-        return new MultiNodeTreePickerPropertyFiller(propertyType, contentService, rootId, filters, jsonSerializer, scopeProvider);
+        // Since mandatory properties cannot contain 0 items,
+        //    the minimum for this property is always at least 1
+        var min = Math.Max(config.MinNumber, 1);
+
+        var max = config.MaxNumber;
+        if (max == default) max = min + 10;
+
+        return new MultiNodeTreePickerPropertyFiller(propertyType, min, max, contentService, rootId, filters, scopeProvider);
     }
 
     private async Task<int> GetRootAsync(IContentService contentService, IPublishedContentQuery publishedContentQuery, IDynamicRootService dynamicRootService, PropertyFillerContext context, MultiNodePickerConfiguration config)
@@ -100,7 +106,7 @@ public class MultiNodeTreePickerPropertyFillerFactory(
             i => publishedContentQuery.Content(i) != null);
 }
 
-public class MultiNodeTreePickerPropertyFiller(IPropertyType propertyType, IContentService contentService, int parentId, IDictionary<string, int>? filters, IJsonSerializer jsonSerializer, IScopeProvider scopeProvider)
+public class MultiNodeTreePickerPropertyFiller(IPropertyType propertyType, int min, int max, IContentService contentService, int parentId, IDictionary<string, int>? filters, IScopeProvider scopeProvider)
         : IPropertyFiller
 {
     public IPropertySink FillProperties(IPropertySink content, IGeneratorContext context)
@@ -122,10 +128,20 @@ public class MultiNodeTreePickerPropertyFiller(IPropertyType propertyType, ICont
         }
 
         var contentCount = contentService.CountDescendants(parentId, filter?.Key);
-        int pageIndex = rnd.Next(0, contentCount);
-        var randomContentItem = contentService.GetPagedDescendants(parentId, pageIndex, 1, out _, query).First();
+        if (contentCount < min) throw new InvalidOperationException("Cannot generate value for MNTP, because the minimum amount of documents exceeds the amount available");
 
-        content.SetValue(propertyType.Alias, Udi.Create(Constants.UdiEntityType.Document, randomContentItem.Key).ToString(), null, null);
+        var amount = rnd.Next(min, Math.Min(max + 1, contentCount));
+        if (amount > 0)
+        {
+            var indexes = rnd.GetRandomInRange(amount, 0, contentCount);
+
+            var contentItems = string.Join(',', indexes
+                .Select(i => contentService.GetPagedDescendants(parentId, i, 1, out _, query).First())
+                .Select(c => Udi.Create(Constants.UdiEntityType.Document, c.Key).ToString())
+            );
+
+            content.SetValue(propertyType.Alias, contentItems, null, null);
+        }
 
         scope.Complete();
 
