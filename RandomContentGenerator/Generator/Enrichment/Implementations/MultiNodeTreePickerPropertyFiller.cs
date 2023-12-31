@@ -46,7 +46,7 @@ public class MultiNodeTreePickerPropertyFillerFactory(
         var max = config.MaxNumber;
         if (max == default) max = min + 10;
 
-        return new MultiNodeTreePickerPropertyFiller(propertyType, min, max, contentService, rootId, filters, scopeProvider);
+        return new MultiNodeTreePickerPropertyFiller(propertyType, min..(max + 1), contentService, rootId, filters, scopeProvider);
     }
 
     private async Task<int> GetRootAsync(IContentService contentService, IPublishedContentQuery publishedContentQuery, IDynamicRootService dynamicRootService, PropertyFillerContext context, MultiNodePickerConfiguration config)
@@ -106,7 +106,7 @@ public class MultiNodeTreePickerPropertyFillerFactory(
             i => publishedContentQuery.Content(i) != null);
 }
 
-public class MultiNodeTreePickerPropertyFiller(IPropertyType propertyType, int min, int max, IContentService contentService, int parentId, IDictionary<string, int>? filters, IScopeProvider scopeProvider)
+public class MultiNodeTreePickerPropertyFiller(IPropertyType propertyType, Range sizeRange, IContentService contentService, int parentId, IDictionary<string, int>? filters, IScopeProvider scopeProvider)
         : IReusablePropertyFiller
 {
     public IPropertySink FillProperties(IPropertySink content, IGeneratorContext context)
@@ -128,19 +128,17 @@ public class MultiNodeTreePickerPropertyFiller(IPropertyType propertyType, int m
         }
 
         var contentCount = contentService.CountDescendants(parentId, filter?.Key);
-        if (contentCount < min) throw new InvalidOperationException("Cannot generate value for MNTP, because the minimum amount of documents exceeds the amount available");
+        if (contentCount < sizeRange.Start.Value) throw new InvalidOperationException("Cannot generate value for MNTP, because the minimum amount of documents exceeds the amount available");
 
-        var amount = rnd.Next(min, Math.Min(max + 1, contentCount));
-        if (amount > 0)
+        var values = rnd.SelectByRandomIndexesFromRange(..contentCount, sizeRange, (i) =>
         {
-            var indexes = rnd.GetRandomInRange(amount, 0, contentCount);
+            var content = contentService.GetPagedDescendants(parentId, i, 1, out _, query).First();
+            return Udi.Create(Constants.UdiEntityType.Document, content.Key).ToString();
+        }).ToList();
 
-            var contentItems = string.Join(',', indexes
-                .Select(i => contentService.GetPagedDescendants(parentId, i, 1, out _, query).First())
-                .Select(c => Udi.Create(Constants.UdiEntityType.Document, c.Key).ToString())
-            );
-
-            content.SetValue(propertyType.Alias, contentItems, null, null);
+        if (values.Count > 0)
+        {
+            content.SetValue(propertyType.Alias, string.Join(',', values), null, null);
         }
 
         scope.Complete();
@@ -150,6 +148,6 @@ public class MultiNodeTreePickerPropertyFiller(IPropertyType propertyType, int m
 
     public IPropertyFiller Reuse(IPropertyType propertyType)
     {
-        return new MultiNodeTreePickerPropertyFiller(propertyType, min, max, contentService, parentId, filters, scopeProvider);
+        return new MultiNodeTreePickerPropertyFiller(propertyType, sizeRange, contentService, parentId, filters, scopeProvider);
     }
 }

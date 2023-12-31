@@ -9,19 +9,10 @@ public abstract class PropertyFillerFactoryBase(string propertyTypeAlias, bool r
     public async ValueTask<IReadOnlyCollection<IPropertyFiller>> CreateAsync(PropertyFillerContext context)
     {
         var properties = context.Properties.Where(p => string.Equals(p.PropertyEditorAlias, propertyTypeAlias)).ToList();
-        List<IPropertyFiller> fillers = new (properties.Count);
-        foreach(var p in properties)
+        List<IPropertyFiller> fillers = new(properties.Count);
+        foreach (var p in properties)
         {
-            IPropertyFiller? filler;
-            if (context.ReusableFillers.TryGetValue(p.DataTypeId, out var reusableFiller))
-            {
-                filler = reusableFiller.Reuse(p);
-            }
-            else
-            {
-                filler = await CreateFillerAsync(p, context);
-                if (reuseFiller && filler is IReusablePropertyFiller f) context.ReusableFillers.Add(p.DataTypeId, f);
-            }
+            IPropertyFiller? filler = await GetFillerAsync(context, p);
 
             if (!p.Mandatory)
             {
@@ -29,11 +20,23 @@ public abstract class PropertyFillerFactoryBase(string propertyTypeAlias, bool r
             }
 
             fillers.Add(filler);
+            context.Consume(p);
         }
 
-        foreach(var p in properties) context.Consume(p);
-
         return fillers;
+    }
+
+    private async Task<IPropertyFiller> GetFillerAsync(PropertyFillerContext context, IPropertyType propertyType)
+    {
+        if (context.ReusableFillers.TryGetValue(propertyType.DataTypeId, out var reusableFiller))
+        {
+            return reusableFiller.Reuse(propertyType);
+        }
+
+        var filler = await CreateFillerAsync(propertyType, context);
+        if (reuseFiller && filler is IReusablePropertyFiller f) context.ReusableFillers.Add(propertyType.DataTypeId, f);
+
+        return filler;
     }
 
     protected abstract ValueTask<IPropertyFiller> CreateFillerAsync(IPropertyType propertyType, PropertyFillerContext context);

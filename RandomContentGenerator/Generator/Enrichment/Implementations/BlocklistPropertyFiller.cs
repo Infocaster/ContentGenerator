@@ -24,7 +24,7 @@ public class BlocklistPropertyFillerFactory(
         var max = config.ValidationLimit.Max ?? min + 10;
 
         // The filler needs to be created before the blockfactories so that we can reuse it recursively
-        var filler = new BlocklistPropertyFiller(propertyType, min, max, jsonSerializer);
+        var filler = new BlocklistPropertyFiller(propertyType, min..(max + 1), jsonSerializer);
         context.ReusableFillers.Add(propertyType.DataTypeId, filler);
         
         var blockFactories = new List<BlockFactory>(config.Blocks.Length);
@@ -65,7 +65,7 @@ public class BlocklistPropertyFillerFactory(
     }
 }
 
-public class BlocklistPropertyFiller(IPropertyType propertyType, int min, int max, IJsonSerializer jsonSerializer)
+public class BlocklistPropertyFiller(IPropertyType propertyType, Range sizeRange, IJsonSerializer jsonSerializer)
         : IReusablePropertyFiller
 {
     private IReadOnlyList<BlockFactory>? blockFactories;
@@ -87,7 +87,7 @@ public class BlocklistPropertyFiller(IPropertyType propertyType, int min, int ma
         context.IncreaseRecursionLevel();
 
         Random rnd = context.GetRandom();
-        var blockCount = rnd.Next(min, max);
+        var blockCount = rnd.Next(sizeRange.Start.Value, sizeRange.End.Value);
 
         var layout = new List<object>();
 
@@ -125,11 +125,11 @@ public class BlocklistPropertyFiller(IPropertyType propertyType, int min, int ma
 
     public IPropertyFiller Reuse(IPropertyType propertyType)
     {
-        return new ReusedBlocklistPropertyFiller(this, propertyType, min, max, jsonSerializer);
+        return new ReusedBlocklistPropertyFiller(this, propertyType, sizeRange, jsonSerializer);
     }
 
-    private class ReusedBlocklistPropertyFiller(BlocklistPropertyFiller original, IPropertyType propertyType, int min, int max, IJsonSerializer jsonSerializer)
-        : BlocklistPropertyFiller(propertyType, min, max, jsonSerializer)
+    private class ReusedBlocklistPropertyFiller(BlocklistPropertyFiller original, IPropertyType propertyType, Range sizeRange, IJsonSerializer jsonSerializer)
+        : BlocklistPropertyFiller(propertyType, sizeRange, jsonSerializer)
     {
         public override IReadOnlyList<BlockFactory> BlockFactories
         {

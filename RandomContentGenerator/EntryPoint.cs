@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using RandomContentGenerator.Generator.Enrichment;
 using RandomContentGenerator.Generator.Enrichment.Implementations;
+using RandomContentGenerator.Generator.Enrichment.Implementations.URLPicker;
 using RandomContentGenerator.Generator.Production;
 using RandomContentGenerator.Menu;
 using RandomContentGenerator.Request;
@@ -25,6 +26,10 @@ namespace RandomContentGenerator
             builder.Services.AddSingleton<IRandomContentFactory, RandomContentFactory>();
             builder.Services.AddSingleton<IRandomContentEnricherFactory, RandomContentEnricherFactory>();
             builder.Services.AddSingleton<IPropertyFillerFactory, TextStringPropertyFillerFactory>();
+
+            builder.Services.AddSingleton<IURLPickerLinkGenerator, URLPickerByContentLinkGenerator>();
+            builder.Services.AddSingleton<IURLPickerLinkGenerator, URLPickerByMediaLinkGenerator>();
+            builder.Services.AddSingleton<IURLPickerLinkGenerator, URLPickerByTextLinkGenerator>();
 
             builder.WithCollectionBuilder<FillerCollectionBuilder>()
                 .Append<TextStringPropertyFillerFactory>()

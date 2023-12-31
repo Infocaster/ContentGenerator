@@ -15,9 +15,9 @@ public class MediaPicker3PropertyFillerFactory(IMediaService mediaService, IMedi
         : PropertyFillerFactoryBase("Umbraco.MediaPicker3")
 {
     protected override ValueTask<IPropertyFiller> CreateFillerAsync(IPropertyType propertyType, PropertyFillerContext context)
-        => ValueTask.FromResult(CreateFiller(propertyType, context));
+        => ValueTask.FromResult<IPropertyFiller>(CreateFiller(propertyType));
 
-    private IPropertyFiller CreateFiller(IPropertyType propertyType, PropertyFillerContext context)
+    private MediaPicker3PropertyFiller CreateFiller(IPropertyType propertyType)
     {
         var config = propertyType.ConfigurationAs<MediaPicker3Configuration>(dataTypeService);
 
@@ -41,11 +41,11 @@ public class MediaPicker3PropertyFillerFactory(IMediaService mediaService, IMedi
         ) : 1;
         var max = config.Multiple ? config.ValidationLimit.Max ?? min + 10 : 1;
 
-        return new MediaPicker3PropertyFiller(propertyType, min, max, mediaService, rootId, filters, jsonSerializer, scopeProvider);
+        return new MediaPicker3PropertyFiller(propertyType, min..(max + 1), mediaService, rootId, filters, jsonSerializer, scopeProvider);
     }
 }
 
-public class MediaPicker3PropertyFiller(IPropertyType propertyType, int min, int max, IMediaService mediaService, int parentId, IDictionary<string, int>? filters, IJsonSerializer jsonSerializer, IScopeProvider scopeProvider)
+public class MediaPicker3PropertyFiller(IPropertyType propertyType, Range sizeRange, IMediaService mediaService, int parentId, IDictionary<string, int>? filters, IJsonSerializer jsonSerializer, IScopeProvider scopeProvider)
         : IReusablePropertyFiller
 {
     public IPropertySink FillProperties(IPropertySink content, IGeneratorContext context)
@@ -67,22 +67,22 @@ public class MediaPicker3PropertyFiller(IPropertyType propertyType, int min, int
         }
 
         var mediaCount = mediaService.CountDescendants(parentId, filter?.Key);
-        if (mediaCount < min) throw new InvalidOperationException("Cannot generate value for MNTP, because the minimum amount of documents exceeds the amount available");
+        if (mediaCount < sizeRange.Start.Value) throw new InvalidOperationException("Cannot generate value for MNTP, because the minimum amount of documents exceeds the amount available");
 
-        var amount = rnd.Next(min, Math.Min(max + 1, mediaCount));
-        if (amount > 0)
+        var values = rnd.SelectByRandomIndexesFromRange(..mediaCount, sizeRange, (i) =>
         {
-            var indexes = rnd.GetRandomInRange(amount, 0, mediaCount);
-            var mediaItems = indexes
-                .Select(i => mediaService.GetPagedDescendants(parentId, i, 1, out _, query).First())
-                .Select(m => new MediaWithCropsDto
-                {
-                    Key = Guid.NewGuid(),
-                    MediaKey = m.Key
-                })
-                .ToList();
+            var mediaItem = mediaService.GetPagedDescendants(parentId, i, 1, out _, query).First();
+            return new MediaWithCropsDto
+            {
+                Key = Guid.NewGuid(),
+                MediaKey = mediaItem.Key
+            };
+        }).ToList();
 
-            content.SetValue(propertyType.Alias, jsonSerializer.Serialize(mediaItems), null, null);
+        if (values.Count > 0)
+        {
+
+            content.SetValue(propertyType.Alias, jsonSerializer.Serialize(values), null, null);
         }
 
         scope.Complete();
@@ -92,7 +92,7 @@ public class MediaPicker3PropertyFiller(IPropertyType propertyType, int min, int
 
     public IPropertyFiller Reuse(IPropertyType propertyType)
     {
-        return new MediaPicker3PropertyFiller(propertyType, min, max, mediaService, parentId, filters, jsonSerializer, scopeProvider);
+        return new MediaPicker3PropertyFiller(propertyType, sizeRange, mediaService, parentId, filters, jsonSerializer, scopeProvider);
     }
 
     [DataContract]
