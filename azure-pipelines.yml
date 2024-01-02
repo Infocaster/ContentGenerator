@@ -1,13 +1,13 @@
 trigger:
   branches:
     include:
-    - v13/main
-    - v13/develop
-    - v13/release/*
-    - v13/hotfix
+    - v10/main
+    - v10/develop
+    - v10/release/*
+    - v10/hotfix
   tags:
     include:
-    - 13.*
+    - 10.*
 
 pool:
   name: Default
@@ -65,10 +65,10 @@ stages:
         customCommand: 'run build'
 
     - task: UseDotNet@2
-      displayName: 'Use .NET 8'
+      displayName: 'Use .NET 6'
       inputs:
         packageType: 'sdk'
-        version: '8.x'
+        version: '6.x'
 
     - task: DotNetCoreCLI@2
       displayName: 'Build solution'
