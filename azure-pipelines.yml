@@ -117,8 +117,8 @@ stages:
   dependsOn: build
   condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/'))
   variables:
-    packageGlob: '$(Pipeline.Workspace)/**/ContentGenerator*.nupkg'
-    symbolsGlob: '$(Pipeline.Workspace)/**/ContentGenerator*.snupkg'
+    packageGlob: '$(Pipeline.Workspace)/**/Infocaster.Umbraco.ContentGenerator*.nupkg'
+    symbolsGlob: '$(Pipeline.Workspace)/**/Infocaster.Umbraco.ContentGenerator*.snupkg'
   jobs:
   - job: releaseArtifact
     displayName: Push to artifacts
