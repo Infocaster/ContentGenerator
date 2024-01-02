@@ -7,12 +7,22 @@ using Umbraco.Cms.Core.Services;
 
 namespace ContentGenerator.Generator.Enrichment.Implementations;
 
-public class BlocklistPropertyFillerFactory(
-    IDataTypeService dataTypeService,
-    IContentTypeService contentTypeService,
-    IJsonSerializer jsonSerializer)
-        : PropertyFillerFactoryBase("Umbraco.BlockList", reuseFiller: false)
+public class BlocklistPropertyFillerFactory : PropertyFillerFactoryBase
 {
+    private readonly IDataTypeService dataTypeService;
+    private readonly IContentTypeService contentTypeService;
+    private readonly IJsonSerializer jsonSerializer;
+
+    public BlocklistPropertyFillerFactory(
+        IDataTypeService dataTypeService,
+        IContentTypeService contentTypeService,
+        IJsonSerializer jsonSerializer) : base("Umbraco.BlockList", reuseFiller: false)
+    {
+        this.dataTypeService = dataTypeService;
+        this.contentTypeService = contentTypeService;
+        this.jsonSerializer = jsonSerializer;
+    }
+
     protected override async ValueTask<IPropertyFiller> CreateFillerAsync(IPropertyType propertyType, PropertyFillerContext context)
     {
         var config = propertyType.ConfigurationAs<BlockListConfiguration>(dataTypeService);
@@ -65,10 +75,19 @@ public class BlocklistPropertyFillerFactory(
     }
 }
 
-public class BlocklistPropertyFiller(IPropertyType propertyType, Range sizeRange, IJsonSerializer jsonSerializer)
-        : IReusablePropertyFiller
+public class BlocklistPropertyFiller : IReusablePropertyFiller
 {
+    private readonly IPropertyType propertyType;
+    private readonly Range sizeRange;
+    private readonly IJsonSerializer jsonSerializer;
     private IReadOnlyList<BlockFactory>? blockFactories;
+
+    public BlocklistPropertyFiller(IPropertyType propertyType, Range sizeRange, IJsonSerializer jsonSerializer)
+    {
+        this.propertyType = propertyType;
+        this.sizeRange = sizeRange;
+        this.jsonSerializer = jsonSerializer;
+    }
 
     public virtual IReadOnlyList<BlockFactory> BlockFactories
     {
@@ -128,9 +147,15 @@ public class BlocklistPropertyFiller(IPropertyType propertyType, Range sizeRange
         return new ReusedBlocklistPropertyFiller(this, propertyType, sizeRange, jsonSerializer);
     }
 
-    private class ReusedBlocklistPropertyFiller(BlocklistPropertyFiller original, IPropertyType propertyType, Range sizeRange, IJsonSerializer jsonSerializer)
-        : BlocklistPropertyFiller(propertyType, sizeRange, jsonSerializer)
+    private class ReusedBlocklistPropertyFiller : BlocklistPropertyFiller
     {
+        private readonly BlocklistPropertyFiller original;
+
+        public ReusedBlocklistPropertyFiller(BlocklistPropertyFiller original, IPropertyType propertyType, Range sizeRange, IJsonSerializer jsonSerializer) : base(propertyType, sizeRange, jsonSerializer)
+        {
+            this.original = original;
+        }
+
         public override IReadOnlyList<BlockFactory> BlockFactories
         {
             get => original.BlockFactories;

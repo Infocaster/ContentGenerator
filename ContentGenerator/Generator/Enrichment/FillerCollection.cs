@@ -13,13 +13,16 @@ public interface IFillerCollection
     ValueTask<IReadOnlyCollection<IPropertyFiller>> GetPropertyFillersAsync(PropertyFillerContext context);
 }
 
-public class FillerCollection(Func<IEnumerable<IPropertyFillerFactory>> items)
-        : BuilderCollectionBase<IPropertyFillerFactory>(items)
+public class FillerCollection : BuilderCollectionBase<IPropertyFillerFactory>
     , IFillerCollection
 {
+    public FillerCollection(Func<IEnumerable<IPropertyFillerFactory>> items) : base(items)
+    {
+    }
+
     public async ValueTask<IReadOnlyCollection<IPropertyFiller>> GetPropertyFillersAsync(PropertyFillerContext context)
     {
-        List<IPropertyFiller> result = [];
+        List<IPropertyFiller> result = new ();
 
         foreach(var factory in this)
         {

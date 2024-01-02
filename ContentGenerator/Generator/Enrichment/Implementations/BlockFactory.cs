@@ -3,12 +3,25 @@ using Umbraco.Cms.Core.Models.Blocks;
 
 namespace ContentGenerator.Generator.Enrichment.Implementations;
 
-public class BlockFactory(
-    Guid contentTypeKey,
-    IReadOnlyCollection<IPropertyFiller> contentPropertyFillers,
-    Guid? settingsTypeKey,
-    IReadOnlyCollection<IPropertyFiller>? settingsPropertyFillers)
+public class BlockFactory
 {
+    private readonly Guid contentTypeKey;
+    private readonly IReadOnlyCollection<IPropertyFiller> contentPropertyFillers;
+    private readonly Guid? settingsTypeKey;
+    private readonly IReadOnlyCollection<IPropertyFiller>? settingsPropertyFillers;
+
+    public BlockFactory(
+        Guid contentTypeKey,
+        IReadOnlyCollection<IPropertyFiller> contentPropertyFillers,
+        Guid? settingsTypeKey,
+        IReadOnlyCollection<IPropertyFiller>? settingsPropertyFillers)
+    {
+        this.contentTypeKey = contentTypeKey;
+        this.contentPropertyFillers = contentPropertyFillers;
+        this.settingsTypeKey = settingsTypeKey;
+        this.settingsPropertyFillers = settingsPropertyFillers;
+    }
+
     public BlockItemData CreateBlock(IGeneratorContext context)
     {
         BlockItemData result = CreateModel(contentTypeKey);

@@ -1,12 +1,9 @@
 using Microsoft.Extensions.DependencyInjection;
 using Umbraco.Cms.Core;
-using Umbraco.Cms.Core.DynamicRoot;
-using Umbraco.Cms.Core.DynamicRoot.QuerySteps;
 using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Models.Entities;
 using Umbraco.Cms.Core.Persistence.Querying;
 using Umbraco.Cms.Core.PropertyEditors;
-using Umbraco.Cms.Core.Serialization;
 using Umbraco.Cms.Core.Services;
 using Umbraco.Cms.Core.Xml;
 using Umbraco.Cms.Infrastructure.Scoping;
@@ -14,23 +11,38 @@ using Umbraco.Extensions;
 
 namespace ContentGenerator.Generator.Enrichment.Implementations;
 
-public class MultiNodeTreePickerPropertyFillerFactory(
-    IDataTypeService dataTypeService,
-    IContentService contentService,
-    IContentTypeService contentTypeService,
-    IEntityService entityService,
-    IServiceScopeFactory serviceScopeFactory,
-    IDynamicRootService dynamicRootService,
-    IScopeProvider scopeProvider)
-    : PropertyFillerFactoryBase("Umbraco.MultiNodeTreePicker")
+public class MultiNodeTreePickerPropertyFillerFactory : PropertyFillerFactoryBase
 {
+    private readonly IDataTypeService dataTypeService;
+    private readonly IContentService contentService;
+    private readonly IContentTypeService contentTypeService;
+    private readonly IEntityService entityService;
+    private readonly IServiceScopeFactory serviceScopeFactory;
+    private readonly IScopeProvider scopeProvider;
+
+    public MultiNodeTreePickerPropertyFillerFactory(
+        IDataTypeService dataTypeService,
+        IContentService contentService,
+        IContentTypeService contentTypeService,
+        IEntityService entityService,
+        IServiceScopeFactory serviceScopeFactory,
+        IScopeProvider scopeProvider) : base("Umbraco.MultiNodeTreePicker")
+    {
+        this.dataTypeService = dataTypeService;
+        this.contentService = contentService;
+        this.contentTypeService = contentTypeService;
+        this.entityService = entityService;
+        this.serviceScopeFactory = serviceScopeFactory;
+        this.scopeProvider = scopeProvider;
+    }
+
     protected override async ValueTask<IPropertyFiller> CreateFillerAsync(IPropertyType propertyType, PropertyFillerContext context)
     {
         var config = propertyType.ConfigurationAs<MultiNodePickerConfiguration>(dataTypeService);
 
         using var serviceScope = serviceScopeFactory.CreateAsyncScope();
 
-        int rootId = await GetRootAsync(contentService, serviceScope.ServiceProvider.GetRequiredService<IPublishedContentQuery>(), dynamicRootService, context, config);
+        int rootId = await GetRootAsync(contentService, serviceScope.ServiceProvider.GetRequiredService<IPublishedContentQuery>(), context, config);
 
         IDictionary<string, int>? filters = null;
         if (!string.IsNullOrWhiteSpace(config.Filter))
@@ -49,7 +61,7 @@ public class MultiNodeTreePickerPropertyFillerFactory(
         return new MultiNodeTreePickerPropertyFiller(propertyType, min..(max + 1), contentService, rootId, filters, scopeProvider);
     }
 
-    private async Task<int> GetRootAsync(IContentService contentService, IPublishedContentQuery publishedContentQuery, IDynamicRootService dynamicRootService, PropertyFillerContext context, MultiNodePickerConfiguration config)
+    private async Task<int> GetRootAsync(IContentService contentService, IPublishedContentQuery publishedContentQuery, PropertyFillerContext context, MultiNodePickerConfiguration config)
     {
         int rootId = Constants.System.Root;
         if (config.TreeSource?.StartNodeId is not null)
@@ -62,32 +74,6 @@ public class MultiNodeTreePickerPropertyFillerFactory(
             var xpathQuery = ParseXPathQuery(config.TreeSource.StartNodeQuery, 0, context.Parent.Id, publishedContentQuery);
             var rootContent = publishedContentQuery.ContentSingleAtXPath(xpathQuery);
             if (rootContent is not null) rootId = rootContent.Id;
-        }
-        else if (config.TreeSource?.DynamicRoot is not null)
-        {
-            var query = new DynamicRootNodeQuery
-            {
-                Context = new DynamicRootContext
-                {
-                    CurrentKey = null,
-                    ParentKey = context.Parent.Key
-                },
-                OriginKey = config.TreeSource.DynamicRoot.OriginKey,
-                OriginAlias = config.TreeSource.DynamicRoot.OriginAlias,
-                QuerySteps = config.TreeSource.DynamicRoot.QuerySteps.Select(x => new DynamicRootQueryStep
-                {
-                    Alias = x.Alias,
-                    AnyOfDocTypeKeys = x.AnyOfDocTypeKeys
-                })
-            };
-
-            var startNodes = (await dynamicRootService.GetDynamicRootsAsync(query)).ToList();
-
-            if (startNodes.Count > 0)
-            {
-                var rootContent = contentService.GetById(startNodes.First());
-                if (rootContent is not null) rootId = rootContent.Id;
-            }
         }
 
         return rootId;
@@ -106,9 +92,25 @@ public class MultiNodeTreePickerPropertyFillerFactory(
             i => publishedContentQuery.Content(i) != null);
 }
 
-public class MultiNodeTreePickerPropertyFiller(IPropertyType propertyType, Range sizeRange, IContentService contentService, int parentId, IDictionary<string, int>? filters, IScopeProvider scopeProvider)
-        : IReusablePropertyFiller
+public class MultiNodeTreePickerPropertyFiller : IReusablePropertyFiller
 {
+    private readonly IPropertyType propertyType;
+    private readonly Range sizeRange;
+    private readonly IContentService contentService;
+    private readonly int parentId;
+    private readonly IDictionary<string, int>? filters;
+    private readonly IScopeProvider scopeProvider;
+
+    public MultiNodeTreePickerPropertyFiller(IPropertyType propertyType, Range sizeRange, IContentService contentService, int parentId, IDictionary<string, int>? filters, IScopeProvider scopeProvider)
+    {
+        this.propertyType = propertyType;
+        this.sizeRange = sizeRange;
+        this.contentService = contentService;
+        this.parentId = parentId;
+        this.filters = filters;
+        this.scopeProvider = scopeProvider;
+    }
+
     public IPropertySink FillProperties(IPropertySink content, IGeneratorContext context)
     {
         Random rnd = context.GetRandom();

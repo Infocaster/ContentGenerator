@@ -11,9 +11,9 @@ public class ManifestFilter : IManifestFilter
         {
             Version = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "0.0.1",
             PackageName = "Content Generator",
-            Scripts = [
+            Scripts = new [] {
                 Defaults.PluginBasePath + "/script.iife.js"
-            ],
+            },
             BundleOptions = BundleOptions.None
         });
     }

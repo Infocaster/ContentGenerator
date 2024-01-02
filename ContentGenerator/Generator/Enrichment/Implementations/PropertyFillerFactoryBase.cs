@@ -3,9 +3,17 @@ using Umbraco.Cms.Core.Models;
 
 namespace ContentGenerator.Generator.Enrichment.Implementations;
 
-public abstract class PropertyFillerFactoryBase(string propertyTypeAlias, bool reuseFiller = true)
-        : IPropertyFillerFactory
+public abstract class PropertyFillerFactoryBase : IPropertyFillerFactory
 {
+    private readonly string propertyTypeAlias;
+    private readonly bool reuseFiller;
+
+    public PropertyFillerFactoryBase(string propertyTypeAlias, bool reuseFiller = true)
+    {
+        this.propertyTypeAlias = propertyTypeAlias;
+        this.reuseFiller = reuseFiller;
+    }
+
     public async ValueTask<IReadOnlyCollection<IPropertyFiller>> CreateAsync(PropertyFillerContext context)
     {
         var properties = context.Properties.Where(p => string.Equals(p.PropertyEditorAlias, propertyTypeAlias)).ToList();

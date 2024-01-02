@@ -6,9 +6,15 @@ using Umbraco.Cms.Core.Notifications;
 
 namespace ContentGenerator.Menu;
 
-public class ContentMenuHandler(IOptionsMonitor<ContentGeneratorOptions> contentGeneratorOptions)
-: INotificationHandler<MenuRenderingNotification>
+public class ContentMenuHandler : INotificationHandler<MenuRenderingNotification>
 {
+    private readonly IOptionsMonitor<ContentGeneratorOptions> contentGeneratorOptions;
+
+    public ContentMenuHandler(IOptionsMonitor<ContentGeneratorOptions> contentGeneratorOptions)
+    {
+        this.contentGeneratorOptions = contentGeneratorOptions;
+    }
+
     public void Handle(MenuRenderingNotification notification)
     {
         if (!string.Equals(notification.TreeAlias, Constants.Trees.Content, StringComparison.Ordinal))

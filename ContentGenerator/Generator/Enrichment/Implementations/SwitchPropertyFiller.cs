@@ -19,9 +19,15 @@ public class SwitchPropertyFillerFactory
     }
 }
 
-public class SwitchPropertyFiller(IPropertyType propertyType)
-        : IReusablePropertyFiller
+public class SwitchPropertyFiller : IReusablePropertyFiller
 {
+    private readonly IPropertyType propertyType;
+
+    public SwitchPropertyFiller(IPropertyType propertyType)
+    {
+        this.propertyType = propertyType;
+    }
+
     public IPropertySink FillProperties(IPropertySink content, IGeneratorContext context)
     {
         var rng = context.GetRandom();

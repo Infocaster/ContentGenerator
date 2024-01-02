@@ -12,9 +12,15 @@ public interface IRandomContentEnricher
     IContent Enrich(IContent content, IGeneratorContext context);
 }
 
-public class RandomContentEnricherFactory(IFillerCollection propertyFillerFactory)
-        : IRandomContentEnricherFactory
+public class RandomContentEnricherFactory : IRandomContentEnricherFactory
 {
+    private readonly IFillerCollection propertyFillerFactory;
+
+    public RandomContentEnricherFactory(IFillerCollection propertyFillerFactory)
+    {
+        this.propertyFillerFactory = propertyFillerFactory;
+    }
+
     public async ValueTask<IEnumerable<IRandomContentEnricher>> CreateAsync(RandomContentEnricherContext context)
     {
         var fillerContext = new PropertyFillerContext(context.Parent, context.ContentType, propertyFillerFactory);
@@ -27,9 +33,15 @@ public class RandomContentEnricherFactory(IFillerCollection propertyFillerFactor
     }
 }
 
-public class PropertyFillerContentEnricher(IReadOnlyCollection<IPropertyFiller> fillers)
-        : IRandomContentEnricher
+public class PropertyFillerContentEnricher : IRandomContentEnricher
 {
+    private readonly IReadOnlyCollection<IPropertyFiller> fillers;
+
+    public PropertyFillerContentEnricher(IReadOnlyCollection<IPropertyFiller> fillers)
+    {
+        this.fillers = fillers;
+    }
+
     public IContent Enrich(IContent content, IGeneratorContext context)
     {
         IPropertySink sink = new ContentPropertySink(content);

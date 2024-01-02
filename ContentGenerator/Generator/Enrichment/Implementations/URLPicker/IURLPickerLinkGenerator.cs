@@ -28,9 +28,15 @@ public abstract class URLPickerLinkGeneratorBase
     }
 }
 
-public class URLPickerByMediaLinkGenerator(IMediaService mediaService)
-    : URLPickerLinkGeneratorBase
+public class URLPickerByMediaLinkGenerator : URLPickerLinkGeneratorBase
 {
+    private readonly IMediaService mediaService;
+
+    public URLPickerByMediaLinkGenerator(IMediaService mediaService)
+    {
+        this.mediaService = mediaService;
+    }
+
     public override MultiUrlPickerValueEditor.LinkDto GenerateLink(IGeneratorContext context)
     {
         var rnd = context.GetRandom();
@@ -44,9 +50,15 @@ public class URLPickerByMediaLinkGenerator(IMediaService mediaService)
     }
 }
 
-public class URLPickerByContentLinkGenerator(IContentService contentService)
-    : URLPickerLinkGeneratorBase
+public class URLPickerByContentLinkGenerator : URLPickerLinkGeneratorBase
 {
+    private readonly IContentService contentService;
+
+    public URLPickerByContentLinkGenerator(IContentService contentService)
+    {
+        this.contentService = contentService;
+    }
+
     public override MultiUrlPickerValueEditor.LinkDto GenerateLink(IGeneratorContext context)
     {
         var rnd = context.GetRandom();

@@ -29,9 +29,15 @@ public class YoutubeUrlPropertyFillerFactory
     }
 }
 
-public class YoutubeUrlPropertyFiller(IPropertyType propertyType)
-    : IPropertyFiller
+public class YoutubeUrlPropertyFiller : IPropertyFiller
 {
+    private readonly IPropertyType propertyType;
+
+    public YoutubeUrlPropertyFiller(IPropertyType propertyType)
+    {
+        this.propertyType = propertyType;
+    }
+
     public IPropertySink FillProperties(IPropertySink content, IGeneratorContext context)
     {
         content.SetValue(propertyType.Alias, "https://youtu.be/KaFtsqU2V6U?si=982_Mjbbc3l8NPj6", null, null);

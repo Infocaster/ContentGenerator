@@ -10,9 +10,15 @@ public interface IRandomContentFactory
     IContent CreateContent(RandomContentFactoryContext context);
 }
 
-public class RandomContentFactory(IContentService contentService)
-        : IRandomContentFactory
+public class RandomContentFactory : IRandomContentFactory
 {
+    private readonly IContentService contentService;
+
+    public RandomContentFactory(IContentService contentService)
+    {
+        this.contentService = contentService;
+    }
+
     public IContent CreateContent(RandomContentFactoryContext context)
     {
         FieldOptionsTextWords fieldOptions = new FieldOptionsTextWords() { Seed = context.GeneratorContext.GetSeed() };

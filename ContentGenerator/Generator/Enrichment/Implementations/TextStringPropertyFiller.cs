@@ -7,9 +7,15 @@ using Umbraco.Cms.Core.Services;
 
 namespace ContentGenerator.Generator.Enrichment.Implementations;
 
-public class TextStringPropertyFillerFactory(IDataTypeService dataTypeService)
-        : PropertyFillerFactoryBase("Umbraco.TextBox")
+public class TextStringPropertyFillerFactory : PropertyFillerFactoryBase
 {
+    private readonly IDataTypeService dataTypeService;
+
+    public TextStringPropertyFillerFactory(IDataTypeService dataTypeService) : base("Umbraco.TextBox")
+    {
+        this.dataTypeService = dataTypeService;
+    }
+
     protected override ValueTask<IPropertyFiller> CreateFillerAsync(IPropertyType propertyType, PropertyFillerContext context)
         => ValueTask.FromResult(CreateFiller(propertyType, context));
         
@@ -23,9 +29,17 @@ public class TextStringPropertyFillerFactory(IDataTypeService dataTypeService)
     }
 }
 
-public class TextStringPropertyFiller(IPropertyType propertyType, int max)
-        : IReusablePropertyFiller
+public class TextStringPropertyFiller : IReusablePropertyFiller
 {
+    private readonly IPropertyType propertyType;
+    private readonly int max;
+
+    public TextStringPropertyFiller(IPropertyType propertyType, int max)
+    {
+        this.propertyType = propertyType;
+        this.max = max;
+    }
+
     public IPropertySink FillProperties(IPropertySink content, IGeneratorContext context)
     {
         var rnd = context.GetRandom();

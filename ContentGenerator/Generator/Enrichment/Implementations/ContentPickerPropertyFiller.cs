@@ -7,11 +7,19 @@ using Umbraco.Extensions;
 
 namespace ContentGenerator.Generator.Enrichment.Implementations;
 
-public class ContentPickerPropertyFillerFactory(
-    IDataTypeService dataTypeService,
-    IContentService contentService)
-        : PropertyFillerFactoryBase("Umbraco.ContentPicker")
+public class ContentPickerPropertyFillerFactory : PropertyFillerFactoryBase
 {
+    private readonly IDataTypeService dataTypeService;
+    private readonly IContentService contentService;
+
+    public ContentPickerPropertyFillerFactory(
+        IDataTypeService dataTypeService,
+        IContentService contentService) : base("Umbraco.ContentPicker")
+    {
+        this.dataTypeService = dataTypeService;
+        this.contentService = contentService;
+    }
+
     protected override ValueTask<IPropertyFiller> CreateFillerAsync(IPropertyType propertyType, PropertyFillerContext context)
         => ValueTask.FromResult(CreateFiller(propertyType, context));
         
@@ -28,9 +36,19 @@ public class ContentPickerPropertyFillerFactory(
     }
 }
 
-public class ContentPickerPropertyFiller(IPropertyType propertyType, IContentService contentService, int parentId)
-        : IReusablePropertyFiller
+public class ContentPickerPropertyFiller : IReusablePropertyFiller
 {
+    private readonly IPropertyType propertyType;
+    private readonly IContentService contentService;
+    private readonly int parentId;
+
+    public ContentPickerPropertyFiller(IPropertyType propertyType, IContentService contentService, int parentId)
+    {
+        this.propertyType = propertyType;
+        this.contentService = contentService;
+        this.parentId = parentId;
+    }
+
     public IPropertySink FillProperties(IPropertySink content, IGeneratorContext context)
     {
         Random rnd = context.GetRandom();

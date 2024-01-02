@@ -11,9 +11,23 @@ using Umbraco.Extensions;
 
 namespace ContentGenerator.Generator.Enrichment.Implementations;
 
-public class MediaPicker3PropertyFillerFactory(IMediaService mediaService, IMediaTypeService mediaTypeService, IDataTypeService dataTypeService, IJsonSerializer jsonSerializer, IScopeProvider scopeProvider)
-        : PropertyFillerFactoryBase("Umbraco.MediaPicker3")
+public class MediaPicker3PropertyFillerFactory : PropertyFillerFactoryBase
 {
+    private readonly IMediaService mediaService;
+    private readonly IMediaTypeService mediaTypeService;
+    private readonly IDataTypeService dataTypeService;
+    private readonly IJsonSerializer jsonSerializer;
+    private readonly IScopeProvider scopeProvider;
+
+    public MediaPicker3PropertyFillerFactory(IMediaService mediaService, IMediaTypeService mediaTypeService, IDataTypeService dataTypeService, IJsonSerializer jsonSerializer, IScopeProvider scopeProvider) : base("Umbraco.MediaPicker3")
+    {
+        this.mediaService = mediaService;
+        this.mediaTypeService = mediaTypeService;
+        this.dataTypeService = dataTypeService;
+        this.jsonSerializer = jsonSerializer;
+        this.scopeProvider = scopeProvider;
+    }
+
     protected override ValueTask<IPropertyFiller> CreateFillerAsync(IPropertyType propertyType, PropertyFillerContext context)
         => ValueTask.FromResult<IPropertyFiller>(CreateFiller(propertyType));
 
@@ -45,9 +59,27 @@ public class MediaPicker3PropertyFillerFactory(IMediaService mediaService, IMedi
     }
 }
 
-public class MediaPicker3PropertyFiller(IPropertyType propertyType, Range sizeRange, IMediaService mediaService, int parentId, IDictionary<string, int>? filters, IJsonSerializer jsonSerializer, IScopeProvider scopeProvider)
-        : IReusablePropertyFiller
+public class MediaPicker3PropertyFiller : IReusablePropertyFiller
 {
+    private readonly IPropertyType propertyType;
+    private readonly Range sizeRange;
+    private readonly IMediaService mediaService;
+    private readonly int parentId;
+    private readonly IDictionary<string, int>? filters;
+    private readonly IJsonSerializer jsonSerializer;
+    private readonly IScopeProvider scopeProvider;
+
+    public MediaPicker3PropertyFiller(IPropertyType propertyType, Range sizeRange, IMediaService mediaService, int parentId, IDictionary<string, int>? filters, IJsonSerializer jsonSerializer, IScopeProvider scopeProvider)
+    {
+        this.propertyType = propertyType;
+        this.sizeRange = sizeRange;
+        this.mediaService = mediaService;
+        this.parentId = parentId;
+        this.filters = filters;
+        this.jsonSerializer = jsonSerializer;
+        this.scopeProvider = scopeProvider;
+    }
+
     public IPropertySink FillProperties(IPropertySink content, IGeneratorContext context)
     {
         Random rnd = context.GetRandom();

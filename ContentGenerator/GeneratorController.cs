@@ -7,8 +7,15 @@ using Umbraco.Extensions;
 namespace ContentGenerator
 {
     [PluginController(Defaults.PluginArea)]
-    public class GeneratorController(IGenerateContentRequestHandler generateContentRequestHandler) : UmbracoAuthorizedApiController
+    public class GeneratorController : UmbracoAuthorizedApiController
     {
+        private readonly IGenerateContentRequestHandler generateContentRequestHandler;
+
+        public GeneratorController(IGenerateContentRequestHandler generateContentRequestHandler)
+        {
+            this.generateContentRequestHandler = generateContentRequestHandler;
+        }
+
         [HttpPost]
         public async Task<IActionResult> Generate(GenerateContentRequest request)
         {

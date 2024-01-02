@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk.Razor">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <StaticWebAssetBasePath>/App_Plugins/ContentGenerator</StaticWebAssetBasePath>
@@ -14,10 +14,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="8.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="6.0.25" />
     <PackageReference Include="RandomDataGenerator.Net" Version="1.0.17" />
-    <PackageReference Include="Umbraco.Cms.Core" Version="13.0.3" />
-    <PackageReference Include="Umbraco.Cms.Web.BackOffice" Version="13.0.3" />
+    <PackageReference Include="Umbraco.Cms.Core" Version="10.8.1" />
+    <PackageReference Include="Umbraco.Cms.Web.BackOffice" Version="10.8.1" />
   </ItemGroup>
 
 </Project>

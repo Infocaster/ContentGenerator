@@ -5,9 +5,12 @@ using Umbraco.Cms.Core.Models;
 
 namespace ContentGenerator.Generator.Enrichment.Implementations;
 
-public class RTEPropertyFillerFactory()
-    : PropertyFillerFactoryBase("Umbraco.TinyMCE")
+public class RTEPropertyFillerFactory : PropertyFillerFactoryBase
 {
+    public RTEPropertyFillerFactory() : base("Umbraco.TinyMCE")
+    {
+    }
+
     protected override ValueTask<IPropertyFiller> CreateFillerAsync(IPropertyType propertyType, PropertyFillerContext context)
         => ValueTask.FromResult(CreateFiller(propertyType, context));
         
@@ -17,9 +20,15 @@ public class RTEPropertyFillerFactory()
     }
 }
 
-public class RTEPropertyFiller(IPropertyType propertyType)
-    : IReusablePropertyFiller
+public class RTEPropertyFiller : IReusablePropertyFiller
 {
+    private readonly IPropertyType propertyType;
+
+    public RTEPropertyFiller(IPropertyType propertyType)
+    {
+        this.propertyType = propertyType;
+    }
+
     public IPropertySink FillProperties(IPropertySink content, IGeneratorContext context)
     {
         var rng = context.GetRandom();

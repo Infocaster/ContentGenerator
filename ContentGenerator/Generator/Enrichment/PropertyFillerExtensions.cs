@@ -7,6 +7,16 @@ public static class PropertyFillerExtensions
     public static IPropertyFiller MakeOptional(this IPropertyFiller source)
         => new OptionalDecoratorPropertyFiller(source);
 
+    public static void Shuffle<T> (this Random rng, T[] array)
+    {
+        int n = array.Length;
+        while (n > 1) 
+        {
+            int k = rng.Next(n--);
+            (array[k], array[n]) = (array[n], array[k]);
+        }
+    }
+
     public static List<int> GetRandomInRange(this Random random, int amount, Range range)
         => random.GetRandomInRange(amount, range.Start.Value, range.End.Value);
 
@@ -27,7 +37,7 @@ public static class PropertyFillerExtensions
             set.Add(random.Next(min, max));
         }
 
-        return [.. set];
+        return set.ToList();
     }
 
     public static IEnumerable<T> SelectByRandomIndexesFromRange<T>(this Random rnd, Range indexRange, Range amountRange, Func<int, T> transformFunc)

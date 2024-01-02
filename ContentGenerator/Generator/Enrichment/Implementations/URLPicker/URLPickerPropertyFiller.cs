@@ -5,9 +5,19 @@ using Umbraco.Cms.Core.Services;
 
 namespace ContentGenerator.Generator.Enrichment.Implementations.URLPicker;
 
-public class URLPickerPropertyFillerFactory(IDataTypeService dataTypeService, IEnumerable<IURLPickerLinkGenerator> linkGeneratorList, IJsonSerializer jsonSerializer)
-    : PropertyFillerFactoryBase("Umbraco.MultiUrlPicker")
+public class URLPickerPropertyFillerFactory : PropertyFillerFactoryBase
 {
+    private readonly IDataTypeService dataTypeService;
+    private readonly IEnumerable<IURLPickerLinkGenerator> linkGeneratorList;
+    private readonly IJsonSerializer jsonSerializer;
+
+    public URLPickerPropertyFillerFactory(IDataTypeService dataTypeService, IEnumerable<IURLPickerLinkGenerator> linkGeneratorList, IJsonSerializer jsonSerializer) : base("Umbraco.MultiUrlPicker")
+    {
+        this.dataTypeService = dataTypeService;
+        this.linkGeneratorList = linkGeneratorList;
+        this.jsonSerializer = jsonSerializer;
+    }
+
     protected override ValueTask<IPropertyFiller> CreateFillerAsync(IPropertyType propertyType, PropertyFillerContext context)
         => ValueTask.FromResult<IPropertyFiller>(CreateFiller(propertyType));
 
@@ -26,9 +36,21 @@ public class URLPickerPropertyFillerFactory(IDataTypeService dataTypeService, IE
     }
 }
 
-public class URLPickerPropertyFiller(IPropertyType propertyType, Range sizeRange, IReadOnlyList<IURLPickerLinkGenerator> linkGeneratorList, IJsonSerializer jsonSerializer)
-    : IReusablePropertyFiller
+public class URLPickerPropertyFiller : IReusablePropertyFiller
 {
+    private readonly IPropertyType propertyType;
+    private readonly Range sizeRange;
+    private readonly IReadOnlyList<IURLPickerLinkGenerator> linkGeneratorList;
+    private readonly IJsonSerializer jsonSerializer;
+
+    public URLPickerPropertyFiller(IPropertyType propertyType, Range sizeRange, IReadOnlyList<IURLPickerLinkGenerator> linkGeneratorList, IJsonSerializer jsonSerializer)
+    {
+        this.propertyType = propertyType;
+        this.sizeRange = sizeRange;
+        this.linkGeneratorList = linkGeneratorList;
+        this.jsonSerializer = jsonSerializer;
+    }
+
     private delegate MultiUrlPickerValueEditor.LinkDto LinkGenerator(IGeneratorContext context);
 
     public IPropertySink FillProperties(IPropertySink content, IGeneratorContext context)

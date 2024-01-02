@@ -2,9 +2,12 @@ using Umbraco.Cms.Core.Models;
 
 namespace ContentGenerator.Generator.Enrichment.Implementations;
 
-public class DateTimePropertyFillerFactory()
-    : PropertyFillerFactoryBase("Umbraco.DateTime")
+public class DateTimePropertyFillerFactory : PropertyFillerFactoryBase
 {
+    public DateTimePropertyFillerFactory() : base("Umbraco.DateTime")
+    {
+    }
+
     protected override ValueTask<IPropertyFiller> CreateFillerAsync(IPropertyType propertyType, PropertyFillerContext context)
         => ValueTask.FromResult(CreateFiller(propertyType, context));
         
@@ -14,9 +17,15 @@ public class DateTimePropertyFillerFactory()
     }
 }
 
-public class DateTimePropertyFiller(IPropertyType propertyType)
-    : IReusablePropertyFiller
+public class DateTimePropertyFiller : IReusablePropertyFiller
 {
+    private readonly IPropertyType propertyType;
+
+    public DateTimePropertyFiller(IPropertyType propertyType)
+    {
+        this.propertyType = propertyType;
+    }
+
     public IPropertySink FillProperties(IPropertySink content, IGeneratorContext context)
     {
         var now = DateTime.UtcNow;

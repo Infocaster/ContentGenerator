@@ -13,7 +13,7 @@ public interface IGeneratorContext
 public class GeneratorContext
     : IGeneratorContext
 {
-    private readonly Dictionary<string, object> content = [];
+    private readonly Dictionary<string, object> content = new ();
 
     public object? this[string key]
     {

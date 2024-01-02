@@ -23,13 +23,25 @@ public interface IGenerateContentRequestHandler
     ValueTask HandleAsync(GenerateContentRequest request, GenerateContentContext context);
 }
 
-public class GenerateContentRequestHandler(
-    IContentService contentService,
-    IContentTypeService contentTypeService,
-    IRandomContentFactory randomContentFactory,
-    IRandomContentEnricherFactory enricherFactory)
-    : IGenerateContentRequestHandler
+public class GenerateContentRequestHandler : IGenerateContentRequestHandler
 {
+    private readonly IContentService contentService;
+    private readonly IContentTypeService contentTypeService;
+    private readonly IRandomContentFactory randomContentFactory;
+    private readonly IRandomContentEnricherFactory enricherFactory;
+
+    public GenerateContentRequestHandler(
+        IContentService contentService,
+        IContentTypeService contentTypeService,
+        IRandomContentFactory randomContentFactory,
+        IRandomContentEnricherFactory enricherFactory)
+    {
+        this.contentService = contentService;
+        this.contentTypeService = contentTypeService;
+        this.randomContentFactory = randomContentFactory;
+        this.enricherFactory = enricherFactory;
+    }
+
     public async ValueTask HandleAsync(GenerateContentRequest request, GenerateContentContext context)
     {
         if (request.Amount < 1) return;
