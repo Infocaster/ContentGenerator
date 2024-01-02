@@ -1,0 +1,21 @@
+mode: ContinuousDeployment
+branches:
+  feature:
+    tag: alpha
+    regex: ^v13/feature/
+    source-branches: [ 'develop' ]
+  develop:
+    tag: beta
+    regex: ^v13/develop$
+  master:
+    tag: ''
+    regex: ^v13/main$
+  hotfix:
+    tag: 'beta'
+    regex: ^v13/hotfix
+    source-branches: [ 'master' ]
+  release:
+    tag: 'rc'
+    regex: ^v13/release
+ignore:
+  sha: []

@@ -5,7 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <StaticWebAssetBasePath>/App_Plugins/ContentGenerator</StaticWebAssetBasePath>
-    <PackageId>Infocaster.ContentGenerator</PackageId>
+    <PackageId>Infocaster.Umbraco.ContentGenerator</PackageId>
   </PropertyGroup>
 
 
