@@ -1,23 +1,32 @@
 <Project Sdk="Microsoft.NET.Sdk.Razor">
 
-  <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <StaticWebAssetBasePath>/App_Plugins/ContentGenerator</StaticWebAssetBasePath>
-    <PackageId>Infocaster.Umbraco.ContentGenerator</PackageId>
-  </PropertyGroup>
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <StaticWebAssetBasePath>/App_Plugins/ContentGenerator</StaticWebAssetBasePath>
+        <PackageId>Infocaster.Umbraco.ContentGenerator</PackageId>
+    </PropertyGroup>
 
 
-  <ItemGroup>
-    <SupportedPlatform Include="browser" />
-  </ItemGroup>
+    <ItemGroup>
+        <SupportedPlatform Include="browser" />
+    </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="6.0.25" />
-    <PackageReference Include="RandomDataGenerator.Net" Version="1.0.17" />
-    <PackageReference Include="Umbraco.Cms.Core" Version="10.8.1" />
-    <PackageReference Include="Umbraco.Cms.Web.BackOffice" Version="10.8.1" />
-  </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="6.0.25" />
+        <PackageReference Include="RandomDataGenerator.Net" Version="1.0.17" />
+        <PackageReference Include="Umbraco.Cms.Core" Version="10.8.1" />
+        <PackageReference Include="Umbraco.Cms.Web.BackOffice" Version="10.8.1" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Content Remove="package-lock.json" />
+        <Content Remove="package.json" />
+        <Content Remove="tsconfig.json" />
+        <None Include="package-lock.json" />
+        <None Include="package.json" />
+        <None Include="tsconfig.json" />
+    </ItemGroup>
 
 </Project>
