@@ -4,7 +4,7 @@ namespace ContentGenerator.Generator.Enrichment;
 
 public interface IRandomContentEnricherFactory
 {
-    ValueTask<IEnumerable<IRandomContentEnricher>> CreateAsync(RandomContentEnricherContext context);
+    ValueTask<IEnumerable<IRandomContentEnricher>> CreateAsync(ContentEnricherContext context);
 }
 
 public interface IRandomContentEnricher
@@ -21,7 +21,7 @@ public class RandomContentEnricherFactory : IRandomContentEnricherFactory
         this.propertyFillerFactory = propertyFillerFactory;
     }
 
-    public async ValueTask<IEnumerable<IRandomContentEnricher>> CreateAsync(RandomContentEnricherContext context)
+    public async ValueTask<IEnumerable<IRandomContentEnricher>> CreateAsync(ContentEnricherContext context)
     {
         var fillerContext = new PropertyFillerContext(context.Parent, context.ContentType, propertyFillerFactory);
 

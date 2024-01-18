@@ -7,7 +7,7 @@ namespace ContentGenerator.Generator.Production;
 
 public interface IRandomContentFactory
 {
-    IContent CreateContent(RandomContentFactoryContext context);
+    IContent CreateContent(ContentFactoryContext context);
 }
 
 public class RandomContentFactory : IRandomContentFactory
@@ -19,7 +19,7 @@ public class RandomContentFactory : IRandomContentFactory
         this.contentService = contentService;
     }
 
-    public IContent CreateContent(RandomContentFactoryContext context)
+    public IContent CreateContent(ContentFactoryContext context)
     {
         FieldOptionsTextWords fieldOptions = new FieldOptionsTextWords() { Seed = context.GeneratorContext.GetSeed() };
         var loremipsumrandomizer = RandomizerFactory.GetRandomizer(fieldOptions);

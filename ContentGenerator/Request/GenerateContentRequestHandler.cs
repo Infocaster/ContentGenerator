@@ -58,14 +58,14 @@ public class GenerateContentRequestHandler : IGenerateContentRequestHandler
         for (int i = 0; i < request.Amount; i++)
         {
             var targetContentType = targetContentTypes[rnd.Next(targetContentTypes.Count)];
-            var newContent = randomContentFactory.CreateContent(new RandomContentFactoryContext(
+            var newContent = randomContentFactory.CreateContent(new ContentFactoryContext(
                 content,
                 targetContentType,
                 context.UserId,
                 generatorContext
             ));
 
-            var enrichers = await enricherFactory.CreateAsync(new RandomContentEnricherContext(
+            var enrichers = await enricherFactory.CreateAsync(new ContentEnricherContext(
                 content,
                 targetContentType
             ));
