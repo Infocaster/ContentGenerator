@@ -2,7 +2,7 @@ using Umbraco.Cms.Core.Models;
 
 namespace ContentGenerator.Generator.Production;
 
-public record RandomContentFactoryContext(
+public record ContentFactoryContext(
     IContent Parent,
     IContentType TargetContentType,
     int UserId,
