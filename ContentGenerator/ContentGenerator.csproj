@@ -6,7 +6,31 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <StaticWebAssetBasePath>/App_Plugins/ContentGenerator</StaticWebAssetBasePath>
         <PackageId>Infocaster.Umbraco.ContentGenerator</PackageId>
+        <PublishRepositoryUrl>true</PublishRepositoryUrl>
+        <RepositoryUrl>https://github.com/Infocaster/ContentGenerator</RepositoryUrl>
+        <PackageProjectUrl>https://github.com/Infocaster/ContentGenerator</PackageProjectUrl>
+        <Authors>Infocaster B.V.</Authors>
+        <Product>Umbraco Content Generator</Product>
+        <PackageLicenseExpression>MPL-2.0</PackageLicenseExpression>
+        <Copyright>Copyright © Infocaster 2024</Copyright>
+        <PackageIcon>infocaster_nuget_pink.png</PackageIcon>
+        <PackageReadmeFile>README-NUGET.md</PackageReadmeFile>
+        <Title>Umbraco Content Generator</Title>
+        <Description>
+            The content generator is a small tool that can help you to easily create any content item so you can quickly have some content to work with.
+        </Description>
     </PropertyGroup>
+
+    <ItemGroup>
+        <None Include="$(MSBuildThisFileDirectory)..\infocaster_nuget_pink.png">
+            <Pack>True</Pack>
+            <PackagePath>\</PackagePath>
+        </None>
+        <None Include="$(MSBuildThisFileDirectory)..\README-NUGET.md">
+            <Pack>True</Pack>
+            <PackagePath>\</PackagePath>
+        </None>
+    </ItemGroup>
 
 
     <ItemGroup>
